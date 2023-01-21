@@ -49,3 +49,7 @@ output "security_group_egress" {
 output "account_id" {
   value = data.aws_caller_identity.current.account_id
 }
+
+output "nat_ngws_1" {
+  value = data.aws_nat_gateway.ngw[*].public_ip
+}

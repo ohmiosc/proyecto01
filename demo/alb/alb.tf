@@ -7,20 +7,20 @@ module "alb" {
   vpc_id              = var.vpc_id
   subnets             = ["subnet-0b9be442f7229d078", "subnet-0a00e0227101d5630"]
   access_logs_bucket  = module.s3_bucket_for_logs.s3_bucket_id
-  access_logs_prefix  =  "logs/${var.product}/${var.environment_prefix}/load-balancer"
+  access_logs_prefix  = "logs/${var.product}/${var.environment_prefix}/load-balancer"
   access_logs_enabled = true
   certificate_arn     = var.certificate_arn
 
-  enable_https_listener                  = true
+  enable_https_listener = true
   #enable_http_listener                   = false
   #enable_redirect_http_to_https_listener = false
 
-  internal            = true
-  idle_timeout        = 120
-  enable_http2        = false
-  ip_address_type     = var.ip_address_type
-  ssl_policy          = "ELBSecurityPolicy-TLS-1-2-2017-01"
-  https_port          = 443
+  internal        = true
+  idle_timeout    = 120
+  enable_http2    = false
+  ip_address_type = var.ip_address_type
+  ssl_policy      = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  https_port      = 443
   #http_port           = 80
   ingress_cidr_blocks = ["0.0.0.0/0"]
 

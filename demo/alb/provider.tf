@@ -2,10 +2,11 @@ provider "aws" {
   region = var.region
   default_tags {
     tags = {
-      Product      = "services"
-      Environment  = "pre"
-      Project      = "mod4"
-      Squad        = "apicips"
+      Product     = "services"
+      Environment = "pre"
+      Project     = "mod4"
+      Squad       = "apicips"
+      IaC         = "Terraform"
     }
   }
 }

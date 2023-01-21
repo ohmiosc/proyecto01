@@ -11,14 +11,14 @@ variable "product" {
 }
 
 variable "environment" {
-  default     = "pre"
+  default     = "pre2c"
   type        = string
   description = "The envrionment where it will be deployed"
 
 }
 
 variable "environment_prefix" {
-  default     = "pre"
+  default     = "pre2c"
   type        = string
   description = "The envrionment prefix where it will be deployed"
 

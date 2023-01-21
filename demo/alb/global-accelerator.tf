@@ -1,5 +1,5 @@
 resource "aws_globalaccelerator_accelerator" "ga" {
-  name            =  "${var.product}-${var.environment_prefix}-global"
+  name = "${var.product}-${var.environment_prefix}-global"
 
   ip_address_type = "IPV4"
   enabled         = true
@@ -23,10 +23,14 @@ resource "aws_globalaccelerator_listener" "ga-listener" {
 }
 
 resource "aws_globalaccelerator_endpoint_group" "ga-endpoint" {
+  depends_on = [
+    module.alb
+  ]
   listener_arn = aws_globalaccelerator_listener.ga-listener.id
-
+  endpoint_group_region = var.region
   endpoint_configuration {
     endpoint_id = module.alb.alb_arn
     weight      = 100
+    client_ip_preservation_enabled = true
   }
 }
