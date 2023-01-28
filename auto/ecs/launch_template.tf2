@@ -1,0 +1,77 @@
+resource "tls_private_key" "this" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "this" {
+  key_name   = "${var.product}-${var.environment_prefix}"
+  public_key = "${tls_private_key.this.public_key_openssh}"
+}
+
+module "role_ecs" {
+  #source  = "git::ssh://git@bitbucket.org/orbisunt/terraform-aws-module-role"
+  source  = "./modules/role_ecs/"
+
+  product     = "${var.product}"
+  project     = "ecs"
+  environment = "${var.environment_prefix}"
+  service     = "ec2"
+  policy      = "${data.template_file.policy_ecs.rendered}"
+}
+
+resource "aws_iam_instance_profile" "profile_ecs" {
+  name = "ec2.${var.product}.${var.environment_prefix}.ecs"
+  role = "${module.role_ecs.name}"
+}
+
+
+data "template_file" "test" {
+  template = <<EOF
+    #!/bin/bash
+
+    stop ecs
+    yum -y update && yum -y install vim telnet 
+    yum update -y ecs-init
+
+    echo "ECS_CLUSTER=${var.ecs_name}" >> /etc/ecs/ecs.config
+    echo "AWS_DEFAULT_REGION=${var.region}" >> /etc/ecs/ecs.config
+    echo "ECS_NUM_IMAGES_DELETE_PER_CYCLE=3" >> /etc/ecs/ecs.config
+    echo "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=1m" >> /etc/ecs/ecs.config
+    echo "ECS_CHECKPOINT=false" >> /etc/ecs/ecs.config
+
+    service docker restart && start ecs
+  EOF
+}
+
+resource "aws_launch_template" "foo" {
+  name = "pagoefectivo-pre-ecs-2023"
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 100
+    }
+  }
+
+  ebs_optimized = true
+  image_id = "ami-08c011700cf146b89"
+  instance_type = "r5.large"
+  key_name = "${aws_key_pair.this.key_name}"
+  iam_instance_profile {
+    name = aws_iam_instance_profile.profile_ecs.name
+  }
+#  metadata_options {
+#    http_endpoint               = "enabled"
+#    http_tokens                 = "required"
+#    http_put_response_hop_limit = 1
+#    instance_metadata_tags      = "enabled"
+#  }
+  monitoring {
+    enabled = true
+  }
+  vpc_security_group_ids = ["sg-12345678"]
+  #user_data = "${data.template_file.data_ecs.rendered}"
+  #user_data = "${data.template_file.test.rendered}"
+  user_data = "${base64encode(data.template_file.test.rendered)}"
+}
