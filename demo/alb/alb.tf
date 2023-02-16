@@ -21,7 +21,6 @@ module "alb" {
   ip_address_type = var.ip_address_type
   ssl_policy      = "ELBSecurityPolicy-TLS-1-2-2017-01"
   https_port      = 443
-  #http_port           = 80
   ingress_cidr_blocks = ["0.0.0.0/0"]
 
   target_group_port                = 80
@@ -41,10 +40,8 @@ module "alb" {
   listener_rule_condition_field    = "path-pattern"
   listener_rule_condition_values   = ["/test"]
   enabled                          = true
-
   tags = {
     ResourceType = "LoadBalancer"
   }
   enable_deletion_protection = false
-
 }

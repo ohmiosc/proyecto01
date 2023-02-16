@@ -18,5 +18,5 @@ terraform {
     key    = "temp/terraform/temp2/alb/terraform.state"
     region = "us-east-1"
   }
-  required_version = ">= 0.12.0"
+  required_version = ">=1.3.0"
 }

@@ -56,11 +56,22 @@ resource "aws_security_group" "allow_sg" {
   }
 }
 
-resource "aws_ecs_cluster" "ecs" {
-  name = "${var.ecs_name}"
-  tags = "${var.tags}"
-}
+#resource "aws_ecs_cluster" "ecs" {
+#  name = "${var.ecs_name}"
+#  tags = "${var.tags}"
+#}
 
+module "ecs" {
+  source = "terraform-aws-modules/ecs/aws"
+  version = "3.5.0"
+  name = "${var.ecs_name}-ecs"
+
+  container_insights = true
+
+  tags = {
+    ResourceType = "ecs"
+  }
+}
 data "template_file" "test" {
   template = <<EOF
     #!/bin/bash
