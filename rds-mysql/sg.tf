@@ -1,12 +1,12 @@
 resource "aws_security_group" "sg-default" {
-  name        = "${var.environment_prefix}-postgressss-sg"
-  description = "${var.environment_prefix}-postgressss-sg"
+  name        = "${var.product}-${var.environment_prefix}-${var.project}-sg"
+  description = "${var.environment_prefix}-mysql-sg"
   vpc_id      = data.aws_vpc.selected.id
 
   ingress {
     description = "Access port postgres "
-    from_port   = 5432 #  By default, the windows server listens on TCP port 3306 for mysql
-    to_port     = 5432
+    from_port   = 3306 #  By default, the windows server listens on TCP port 3306 for mysql
+    to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }

@@ -30,13 +30,16 @@ data "aws_subnets" "private" {
 #  name = "alias/aws/secretsmanager"
 #}
 
-data "aws_subnet" "private-1" {
+data "aws_subnets" "private-default" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.selected.id]
   }
+  filter {
+    name   = "availability-zone-id"
+    values = ["euw1-az1"]
+  }
   tags = {
     "paysafe:subnet-type" = "private-edge"
   }
- id = data.aws_subnets.private.ids[2]
 }

@@ -24,6 +24,12 @@ variable "environment_prefix" {
 
 }
 
+variable "project" {
+  default     = "postgress"
+  type        = string
+  description = "the name project"
+}
+
 variable "vpc_name" {
   type    = string
   default = "AWS-VPC-042"
