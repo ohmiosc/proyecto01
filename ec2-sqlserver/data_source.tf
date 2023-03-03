@@ -37,3 +37,20 @@ data "aws_subnets" "private" {
     "paysafe:subnet-type" = "private-edge"
   }
 }
+data "template_file" "windows-userdata" {
+  template = <<EOF
+    <powershell>
+    Set-TimeZone -Id "SA Pacific Standard Time"
+    
+    ###############
+    # create user #
+    ###############
+    $NewPassword = ConvertTo-SecureString "Aa12345678909876543$" -AsPlainText -Force 
+    New-LocalUser "dbadmin" -Password $NewPassword -FullName "DB Admin" -Description "User Admin DBA"
+    Add-LocalGroupMember -Group "Administrators" -Member "dbadmin"
+    
+    Rename-Computer -NewName ${var.product}-${var.environment_prefix}-db-sqlserver-ec2 -Force
+    </powershell>
+    <persist>true</persist>
+  EOF
+}

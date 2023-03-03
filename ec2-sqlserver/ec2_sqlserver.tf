@@ -6,7 +6,7 @@ resource "aws_instance" "windows-server" {
   vpc_security_group_ids = [aws_security_group.allow_rdp.id]
   source_dest_check      = false
   key_name               = data.aws_key_pair.ec2_key.key_name
-  #user_data              = data.template_file.windows-userdata.rendered
+  user_data              = data.template_file.windows-userdata.rendered
   iam_instance_profile = aws_iam_instance_profile.sql-server-profile.id
   monitoring           = true
   ebs_optimized        = true

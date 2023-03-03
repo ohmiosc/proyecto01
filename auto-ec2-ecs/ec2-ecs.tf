@@ -9,84 +9,24 @@ resource "aws_key_pair" "this" {
   public_key = "${tls_private_key.this.public_key_openssh}"
 }
 
-module "role_ecs" {
-  #source  = "git::ssh://git@bitbucket.org/orbisunt/terraform-aws-module-role"
-  source  = "./modules/role_ecs/"
-
-  product     = "${var.product}"
-  project     = "ecs"
-  environment = "${var.environment_prefix}"
-  service     = "ec2"
-  policy      = "${data.template_file.policy_ecs.rendered}"
-}
-
-resource "aws_iam_instance_profile" "profile_ecs" {
-  name = "ec2.${var.product}.${var.environment_prefix}.ecs"
-  role = "${module.role_ecs.name}"
-}
-
-resource "aws_security_group" "allow_sg" {
-  name        = "${var.product}-${var.environment_prefix}-sg"
-  description = "Virtual firewall that controls the traffic"
-  vpc_id      = "${data.aws_vpc.selected.id}"
-
-  ingress {
-    description = "Access port all "
-    from_port   = 0 #  By default, the windows server listens on TCP port 3389 for RDP
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
- # ingress {
- #   description = "Access Service HTTP Balancer internal"
- #   from_port   = 0
- #   to_port     = 65535
- #   protocol    = "tcp"
- #   #cidr_blocks = ["10.0.0.0/8"]
- #   security_groups = "${aws_security_group.allow_sg.id}"
- # }
-  
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow egress traffic"
-  }
-}
-
-#resource "aws_ecs_cluster" "ecs" {
-#  name = "${var.ecs_name}"
-#  tags = "${var.tags}"
-#}
-
-module "ecs" {
-  source = "terraform-aws-modules/ecs/aws"
-  version = "3.5.0"
-  name = "${var.ecs_name}-ecs"
-
-  container_insights = true
-
-  tags = {
-    ResourceType = "ecs"
-  }
-}
 data "template_file" "test" {
   template = <<EOF
     #!/bin/bash
 
     stop ecs
-    yum -y update && yum -y install vim telnet 
-    yum update -y ecs-init
+    yum -y update && yum -y install vim telnet wget aws-cli
+    yum update -y ecs-init 
 
     echo "ECS_CLUSTER=${var.ecs_name}" >> /etc/ecs/ecs.config
     echo "AWS_DEFAULT_REGION=${var.region}" >> /etc/ecs/ecs.config
     echo "ECS_NUM_IMAGES_DELETE_PER_CYCLE=3" >> /etc/ecs/ecs.config
     echo "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=1m" >> /etc/ecs/ecs.config
     echo "ECS_CHECKPOINT=false" >> /etc/ecs/ecs.config
-
     service docker restart && start ecs
+    ##
+    aws s3 cp s3://infraestructura.dev/config/autoscaling/pagoefectivo/dev/ecs/pe-dev/ecs1.sh  /tmp/script.sh
+    /bin/chmod +x /tmp/script.sh
+    /bin/bash /tmp/script.sh
   EOF
 }
 
@@ -106,7 +46,7 @@ resource "aws_launch_template" "foo" {
   instance_type = "r5.large"
   key_name = "${aws_key_pair.this.key_name}"
   iam_instance_profile {
-    name = aws_iam_instance_profile.profile_ecs.name
+    name = aws_iam_instance_profile.ec2-ecs-profile.name
   }
 #  metadata_options {
 #    http_endpoint               = "enabled"
