@@ -2,7 +2,7 @@ data "aws_s3_bucket" "cw_canaries" {
   depends_on = [
     aws_s3_bucket.cw_canarys
   ]
-  bucket = "cw-canaries-${data.aws_caller_identity.current.account_id}"
+  bucket = "cw-canaries-${data.aws_caller_identity.current.account_id}-${var.service}"
 }
 resource "aws_synthetics_canary" "some" {
     depends_on = [
